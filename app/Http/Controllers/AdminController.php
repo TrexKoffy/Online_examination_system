@@ -6,8 +6,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Subject;
 use App\Models\Exam;
+use App\Models\User;
 use App\Models\Question;
 use App\Models\Answer;
+
+
+use App\Imports\QnaImport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Hash;
+use Mail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\URL;
+
+
 
 
 class AdminController extends Controller
@@ -258,5 +269,85 @@ class AdminController extends Controller
         Answer::where('questions_id',$request->id)->delete();
 
         return response()->json(['success'=>true,'msg'=>'Q&A deleted successfully!']);
+    }
+
+    public function importQna(Request $request)
+    {
+        try{
+
+            Excel::import(new QnaImport, $request->file('file'));
+
+            return response()->json(['success'=>true,'msg'=>'Import Q&A succesfullly!']);
+
+        }catch(\Exception $e){
+            return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
+        }
+    }
+
+    //student dashboard
+    public function studentsDashboard()
+    {
+        $students = User::where('is_admin',0)->get();
+        return view('admin.studentsDashboard',compact('students'));
+    } 
+
+    //add Student
+
+    public function addStudent(Request $request)
+    {
+        try {
+        
+            $password = Str::random(8);
+
+            User::insert([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($password)
+            ]);
+
+            $url = URL::to('/');
+
+            $data['url'] = $url;
+            $data['name'] = $request->name;
+            $data['email'] = $request->email;
+            $data['password'] = $password;
+            $data['title'] = "Student Registration on OES";
+           
+            Mail::send('registrationMail',['data'=>$data],function($message) use ($data){
+                $message->to($data['email'])->subject($data['title']);
+        });
+        return response()->json(['success'=>true,'msg'=>'Student added Succesfullly!']);
+
+        }catch(\Exception $e){
+            return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
+        }
+    }
+
+    //update student
+    public function editStudent(Request $request)
+    {
+        try {
+            $user = User::find($request->id);
+
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->save();
+
+
+            $url = URL::to('/');
+
+            $data['url'] = $url;
+            $data['name'] = $request->name;
+            $data['email'] = $request->email;
+            $data['title'] = "Student Student Profile on OES";
+           
+            Mail::send('updateProfileMail',['data'=>$data],function($message) use ($data){
+                $message->to($data['email'])->subject($data['title']);
+        });
+        return response()->json(['success'=>true,'msg'=>'Student updated Succesfullly!']);
+
+        }catch(\Exception $e){
+            return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
+        }
     }
 }

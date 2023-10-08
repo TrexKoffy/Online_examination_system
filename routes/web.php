@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ExcelCSVController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,15 @@ use App\Http\Controllers\AdminController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+//excel routes
+//Route::get('excel-csv-file', [ExcelCSVController::class,'index']);
+//Route::post('import-excel-csv-file', [ExcelCSVController::class,'importExcelCSV']);
+//Route::post('export-excel-csv-file/{slug}', [ExcelCSVController::class,'exportExcelCSV']);
+
+
+
 
 
 Route::get('/register',[AuthController::class,'loadRegister']);
@@ -63,6 +73,15 @@ Route::group(['middleware'=>['web', 'checkAdmin']],function(){
         Route::get('/delete-ans',[AdminController::class,'deleteAns'])->name('deleteAns');
         Route::post('/update-qna-ans',[AdminController::class,'updateQna'])->name('updateQna');
         Route::post('/delete-qna-ans',[AdminController::class,'deleteQna'])->name('deleteQna');
+        Route::post('/import-qna-ans',[AdminController::class,'importQna'])->name('importQna');
+
+        //Students routing
+
+        Route::get('/admin/students',[AdminController::class,'studentsDashboard']);
+        Route::post('/add-student',[AdminController::class,'addStudent'])->name('addStudent');
+        Route::post('/edit-student',[AdminController::class,'editStudent'])->name('editStudent');
+
+
 });
 
 Route::group(['middleware'=>['web','checkStudent  ']],function(){
