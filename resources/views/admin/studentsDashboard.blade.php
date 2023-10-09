@@ -14,7 +14,7 @@
             <th>Name</th>
             <th>Email</th>
             <th>Edit</th>
-
+            <th>Delete</th>
             </thead>
         <tbody>
             @if(count($students) > 0)
@@ -29,6 +29,10 @@
                     </button>
                     </td>
                     <td>
+                        <button type="button" data-id="{{ $student->id }}" class="btn btn-danger deleteButton" data-toggle="modal" data-target="#deleteStudentModal">
+                        Delete
+                    </button>
+                    </td>
                 </tr>   
                 @endforeach
             @else
@@ -106,6 +110,33 @@
     </div>
 </div>
 
+
+ <!-- Delete Student Modal -->
+<div class="modal fade" id="deleteStudentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Delete Student</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+        </div>
+        <form id="deleteStudent">
+            @csrf
+            <div class="modal-body"> 
+                    <p>Are you sure you want to delete Student?</p>                   
+                    <input type="hidden" name="id" id="student_id">
+                </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+
+
 <script>
     $(document).ready(function(){
         $("#addStudent").submit(function(e){
@@ -158,7 +189,39 @@
             });
 
         });
+
+        $(".deleteButton").click(function(){
+            var id = $(this).attr('data-id');
+            $("#student_id").val(id);
+        });
+
         
+         $(".deleteButton").click(function(){
+
+            $("#id").val( $(this).attr('data-id') );
+            $("#name").val( $(this).attr('data-name') );
+            $("#email").val( $(this).attr('data-email') );
+        });
+        
+        $("#deleteStudent").submit(function(e){
+            e.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                url:"{{ route('deleteStudent') }}",
+                type:"POST",
+                data:formData,
+                success:function(data){
+                    if(data.success == true){
+                        location.reload();
+                    }
+                    else{
+                        alert(data.msg);
+                    }
+                }
+            });
+
+        });
+
        
     });
 </script>
