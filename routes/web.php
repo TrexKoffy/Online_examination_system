@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ExcelCSVController;
+use App\Http\Controllers\ExamController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -86,16 +88,16 @@ Route::group(['middleware'=>['web', 'checkAdmin']],function(){
         Route::get('/get-questions',[AdminController::class,'getQuestions'])->name('getQuestions');
         Route::post('/add-questions',[AdminController::class,'addQuestions'])->name('addQuestions');
         Route::get('/get-exam-questions',[AdminController::class,'getExamQuestions'])->name('getExamQuestions');
-
-
-        
-
+        Route::get('/delete-exam-questions',[AdminController::class,'deleteExamQuestions'])->name('deleteExamQuestions');
 
 
 });
 
 Route::group(['middleware'=>['web','checkStudent']],function(){
     Route::get('/dashboard',[AuthController::class, 'loadDashboard']);
+    Route::get('/exam/{id}',[ExamController::class, 'loadExamDashboard']);
+
+    Route::post('/exam-submit',[ExamController::class,'examSubmit'])->name('examSubmit');
 });
 
 
