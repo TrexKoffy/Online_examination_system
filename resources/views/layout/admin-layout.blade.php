@@ -36,10 +36,16 @@
             <a href="/admin/exam"><span class="fa fa-tasks mr-3"></span> Exams</a>
           </li>
           <li class="active">
+            <a href="/admin/marks"><span class="fa fa-check mr-3"></span> Marks</a>
+          </li>
+          <li class="active">
             <a href="/admin/qna-ans"><span class="fa fa-question-circle mr-3"></span> Q&A</a>
           </li>
           <li class="active">
             <a href="/admin/students"><span class="fa fa-graduation-cap mr-3"></span> Students</a>
+          </li>
+          <li class="active">
+            <a href="/admin/review-exams"><span class="fa fa-file-text-o mr-3"></span> Exam Review</a>
           </li>
           <li>
               <a href="/logout"><span class="fa fa-sign-out mr-3"></span> Logout</a>

@@ -6,10 +6,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Subject;
 use App\Models\Exam;
+use App\Models\ExamAttempt;
 use App\Models\User;
 use App\Models\Question;
 use App\Models\Answer;
 use App\Models\QnaExam;
+use App\Models\ExamAnswer;
 
 use App\Imports\QnaImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -435,11 +437,106 @@ class AdminController extends Controller
     public function deleteExamQuestions(Request $request)
     {
         try {
+
            QnaExam::where('id',$request->id)->delete();
            return response()->json(['success'=>true,'msg'=>'Questions deleted!']);
 
         }catch(\Exception $e){
             return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
         }
+    }
+
+    public function loadMarks()
+    {
+        $exams = Exam::with('getQnaExam')->get();
+        return view('admin.marksDashboard',compact('exams'));
+    }
+
+    public function updateMarks(Request $request)
+    {
+        try{
+            
+            Exam::where('id',$request->exam_id)->update([
+                'marks' => $request->marks,
+                'pass_marks' => $request->pass_marks
+            ]);
+            return response()->json(['success'=>true,'msg'=>'Marks Updated!']);
+
+        }catch(\Exception $e){
+            return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
+        }
+    }
+
+    public function reviewExams()
+    {
+        $attempts = ExamAttempt::with(['user','exam'])->orderBy('id')->get();
+
+        return view('admin.review-exams',compact('attempts'));
+    }
+
+    public function reviewQna(Request $request)
+    {
+
+        try{
+         
+        $attemptData = ExamAnswer::where('attempt_id',$request->attept_id)->with(['questions','answers'])->get();
+        
+        return response()->json(['success'=>true,'data'=>$attemptData]);
+
+
+        }catch(\Exception $e){
+            return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
+        }
+
+    }
+
+    public function approvedQna(Request $request)
+    {
+
+        try{
+
+            $attemptId = $request->attempt_id;
+
+            $examData = ExamAttempt::where('id',$attemptId)->with(['user','exam'])->get();
+            $marks = $examData[0]['exam']['marks'];
+
+            $attemptData = ExamAnswer::where('attempt_id',$attemptId)->with('answers')->get();
+
+            $totalMarks = 0;
+            
+            if(count($attemptData) > 0){
+
+                foreach($attemptData as $attempt){
+
+                    if($attempt->answers->is_correct == 1){
+                        $totalMarks += $marks;
+                    }
+                }
+
+            }
+
+            ExamAttempt::where('id',$attemptId)->update([
+                'status' => 1,
+                'marks' => $totalMarks
+            ]);
+
+            $url = URL::to('/');
+
+            $data['url'] = $url.'/results';
+            $data['name'] = $examData[0]['user']['name'];
+            $data['email'] = $examData[0]['user']['email'];
+            $data['exam_name'] = $examData[0]['exam']['exam_name'];
+            $data['title'] = $examData[0]['exam']['exam_name'].' Result';
+
+            Mail::send('result-mail',['data' => $data], function($message) use ($data){
+                $message->to($data['email'])->subject($data['title']);
+            });
+
+            return response()->json(['success'=>true,'msg'=>'Approved Successfully!']);
+
+        }catch(\Exception $e){
+            return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
+        }
+
     }
 }

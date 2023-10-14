@@ -19,7 +19,13 @@ class ExamController extends Controller
     {
         $qnaExam = Exam::where('entrance_id',$id)->with('getQnaExam')->get();
         if(count($qnaExam) > 0){
-            if($qnaExam[0]['date'] == date('Y-m-d')){
+            $attemptCount = ExamAttempt::where(['exam_id'=>$qnaExam[0]['id'], 'user_id'=> auth()->user()->id])->count();  
+            if($attemptCount >= $qnaExam[0]['attempt']){
+                return view('student.exam-dashboard',['success'=>false,'msg'=>'Your exam attemption has been completed','exam'=>$qnaExam]);
+
+            }
+            else if($qnaExam[0]['date'] == date('Y-m-d')){
+                
                 if(count($qnaExam[0]['getQnaExam']) > 0){
                     
                    $qna = QnaExam::where('exam_id',$qnaExam[0]['id'])->with('question','answers')->inRandomOrder()->get();
@@ -70,5 +76,24 @@ class ExamController extends Controller
         }
 
         return view('thank-you');
+    }
+
+    public function resultDashboard()
+    {
+        $attempts = ExamAttempt::where('user_id',Auth()->user()->id)->with('exam')->orderBy('updated_at')->get();
+        return view('student.results',compact('attempts'));
+    }
+
+    public function reviewQna(Request $request)
+    {
+        try{
+
+           $attemptData = ExamAnswer::where('attempt_id',$request->attempt_id)->with(['question','answers'])->get();
+          
+           return response()->json(['success'=>true,'msg'=>'Q&A Data','data'=>$attemptData]);
+            
+        } catch (\Exception $e) {
+            return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
+        }
     }
 }

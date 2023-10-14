@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ExamAttempt;
 
 class Exam extends Model
 {
@@ -14,7 +15,10 @@ class Exam extends Model
         'date',
         'time',
         'attempt'
+
     ];
+    protected $appends = ['attempt_counter' ];
+    public $count = 0;  
 
     public function subjects()
     {
@@ -24,6 +28,19 @@ class Exam extends Model
     public function getQnaExam()
     {
         return $this->hasMany(QnaExam::class, 'exam_id','id');
+    }
+
+    public function getIdAttribute($value)
+    {
+        $attemptCount = ExamAttempt::where(['exam_id'=>$value, 'user_id'=> auth()->user()->id])->count();  
+        $this->count = $attemptCount;
+        return $value;
+    }
+
+
+    public function getAttemptCounterAttribute()
+    {
+        return $this->count;
     }
 }
 
