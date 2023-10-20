@@ -17,6 +17,8 @@
                 <th>Date</th>
                 <th>Time</th>
                 <th>Attempt</th>
+                <th>Plan</th>
+                <th>Prices</th>
                 <th>Add Questions</th>
                 <th>Show Questions</th>           
                 <th>Edit</th>
@@ -34,6 +36,23 @@
                         <td>{{ $exam->date }}</td>
                         <td>{{ $exam->time }} Hrs</td>
                         <td>{{ $exam->attempt }} Time</td>
+                        <td>
+                            @if($exam->plan != 0)
+                                <span style="color:red">PAID</span>
+                            @else
+                                <span style="color:green">FREE</span>
+                            @endif
+                        </td>
+                        <td>
+                        @if($exam->prices != null)
+                                @php $planPrices = json_decode($exam->prices); @endphp
+                                @foreach($planPrices as $key => $price)
+                                    <span>{{ $key }} {{ $price }},</span>
+                                @endforeach
+                            @else
+                                <span>No prices</span>
+                            @endif
+                        </td>
                         <td>
                             <a href="#" class="addQuestion" data-id="{{ $exam->id }}" data-toggle="modal" data-target="#addQnaModal">Add Questions</a>
                         </td>
@@ -86,7 +105,15 @@
                     <br><br>
                     <input type="time" name="time" class="w-100" required>
                     <br><br>
-                    <input type="number" min="1" name="attempt" placeholder="Enter Exam Attempt Time" class="w-100" required>               
+                    <input type="number" min="1" name="attempt" placeholder="Enter Exam Attempt Time" class="w-100" required>  
+                    <br><br>
+                    <select name="plan" required class="w-100 mb-4 plan">
+                            <option value="">Select Plan</option>
+                            <option value="0">Free</option>
+                            <option value="1">Paid</option>
+                    </select>
+                    <input type="number" placeholder="In NGN" name="ngn" disabled>                 
+                    <input type="number" placeholder="In USD" name="usd" disabled>                 
             </div>
             <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -166,7 +193,15 @@
                     <br><br>
                     <input type="time" name="time" id="time" class="w-100" required>
                     <br><br>
-                    <input type="number" min="1" id="attempt" name="attempt" placeholder="Enter Exam Attempt Time" class="w-100" required>               
+                    <input type="number" min="1" id="attempt" name="attempt" placeholder="Enter Exam Attempt Time" class="w-100" required> 
+                    <br><br>
+                    <select name="plan" id="plan" required class="w-100 mb-4 plan">
+                            <option value="">Select Plan</option>
+                            <option value="0">Free</option>
+                            <option value="1">Paid</option>
+                    </select>
+                    <input type="number" id="ngn" placeholder="In NGN" name="ngn" disabled>                 
+                    <input type="number" id="usd" placeholder="In USD" name="usd" disabled>                 
             </div>
             <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -256,7 +291,9 @@
                 }
             }); 
 
-        });     
+        });
+
+    });     
 
         $(".editButton").click(function(){
             var id = $(this).attr('data-id');
@@ -264,6 +301,10 @@
 
             var url = '{{ route("getExamDetail","id") }}';
             url = url.replace('id',id);
+
+            $('#ngn').val('');
+            $('#usd').val('');
+
         
             $.ajax({
                 url:url,
@@ -277,7 +318,32 @@
                         $('#time').val(exam[0].time);
                         $('#attempt').val(exam[0].attempt);            
 
-                        
+                        $('#plan').val(exam[0].plan);
+
+                        if(exam[0].plan == 1){
+                            
+                            let prices = JSON.parse(exam[0].prices);
+                            $('#ngn').val(prices.NGN);
+                            $('#usd').val(prices.USD);
+
+                            $('#ngn').prop('disabled',false);
+                            $('#usd').prop('disabled',false);
+
+                            $('#ngn').attr('required','required');
+                            $('#usd').attr('required','required');
+
+                        }
+                        else{
+
+                            $('#ngn').prop('disabled',true);
+                            $('#usd').prop('disabled',true);
+
+                            $('#ngn').removeAttr('required');
+                            $('#usd').removeAttr('required');
+
+                        }
+
+
                     }
                     else{
                         alert(data.msg);
@@ -461,6 +527,26 @@
 
         });
 
+        //plan js
+       
+        $('.plan').change(function(){
+
+            var plan = $(this).val();
+             if(plan == 1){
+                $(this).next().attr('required','required');
+                $(this).next().next().attr('required','required');
+                
+                $(this).next().prop('disabled',false);
+                $(this).next().next().prop('disabled',false);
+             }
+             else{
+                $(this).next().removeAttr('required','required');
+                $(this).next().next().removeAttr('required','required');
+
+                $(this).next().prop('disabled',true);
+                $(this).next().next().prop('disabled',true);
+
+             }
     });
 </script>
 

@@ -14,7 +14,9 @@ class Exam extends Model
         'subject_id',
         'date',
         'time',
-        'attempt'
+        'attempt',
+        'plan',
+        'prices'
 
     ];
     protected $appends = ['attempt_counter' ];

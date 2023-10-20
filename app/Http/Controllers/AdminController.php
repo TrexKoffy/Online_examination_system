@@ -14,6 +14,7 @@ use App\Models\QnaExam;
 use App\Models\ExamAnswer;
 
 use App\Imports\QnaImport;
+use App\Exports\ExportStudent;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Hash;
 use Mail;
@@ -92,6 +93,13 @@ class AdminController extends Controller
     public function addExam(Request $request)
     {
         try{
+            $plan = $request->plan;
+            $prices =  null;
+
+            if(isset($request->ngn) && isset($request->usd)){
+                $prices = json_encode(['NGN'=>$request->ngn,'USD'=>$request->usd]);
+            }
+
             $unique_id = uniqid('exid');
             Exam::insert([
                 'exam_name' => $request->exam_name,
@@ -99,7 +107,9 @@ class AdminController extends Controller
                 'date' => $request->date,
                 'time' => $request->time,
                 'attempt' => $request->attempt,
-                'entrance_id' =>$unique_id
+                'entrance_id' =>$unique_id,
+                'plan' => $plan,
+                'prices' => $prices
             ]);
             return response()->json(['success'=>true,'msg'=>'Exam added Successfully!']);
             
@@ -133,12 +143,22 @@ class AdminController extends Controller
 
         try{
 
+
+            $plan = $request->plan;
+            $prices =  null;
+
+            if(isset($request->ngn) && isset($request->usd)){
+                $prices = json_encode(['NGN'=>$request->ngn,'USD'=>$request->usd]);
+            }
+
             $exam = Exam::find($request->exam_id);
             $exam->exam_name = $request->exam_name;
             $exam->subject_id = $request->subject_id;
             $exam->date = $request->date;
             $exam->time = $request->time;
             $exam->attempt = $request->attempt;
+            $exam->plan = $plan;
+            $exam->prices = $prices;
             $exam->save();
             return response()->json(['success'=>true,'msg'=>'Exam updated successfully!']);
               
@@ -174,8 +194,14 @@ class AdminController extends Controller
     {
         try{
 
+            $explanaton = null;
+            if(isset($request->explanation)){
+                $explanation = $request->explanation;
+            }
+
             $questionId = Question::insertGetId([
-                'question' => $request->question
+                'question' => $request->question,
+                'explanation' => $explanation
             ]);
             
             foreach($request->answers as $answer){
@@ -217,8 +243,14 @@ class AdminController extends Controller
     {
         try{
 
+            $explanaton = null;
+            if(isset($request->explanation)){
+                $explanation = $request->explanation;
+            }
+
             Question::where('id',$request->question_id)->update([
-                'question' => $request->question
+                'question' => $request->question,
+                'explanation' => $explanation
             ]);
 
             //old answer update
@@ -366,6 +398,11 @@ class AdminController extends Controller
         }catch(\Exception $e){
             return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
         }
+    }
+
+    public function exportStudents()
+    {
+        return Excel::download(new ExportStudent, 'students.xlsx');
     }
 
 

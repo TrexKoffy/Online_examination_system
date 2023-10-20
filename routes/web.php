@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ExcelCSVController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\StudentController;
 
 
 /*
@@ -83,6 +84,7 @@ Route::group(['middleware'=>['web', 'checkAdmin']],function(){
         Route::post('/add-student',[AdminController::class,'addStudent'])->name('addStudent');
         Route::post('/edit-student',[AdminController::class,'editStudent'])->name('editStudent');
         Route::post('/delete-student',[AdminController::class,'deleteStudent'])->name('deleteStudent');
+        Route::get('/export-students',[AdminController::class,'exportStudents'])->name('exportStudents');
 
         //qna exams routing
         Route::get('/get-questions',[AdminController::class,'getQuestions'])->name('getQuestions');
@@ -110,6 +112,7 @@ Route::group(['middleware'=>['web','checkStudent']],function(){
 
     Route::get('/results',[ExamController::class,'resultDashboard'])->name('resultDashboard');
     Route::get('/review-student-qna',[ExamController::class,'reviewQna'])->name('resultStudentQna');
+    Route::get('/paid-exams',[StudentController::class,'paidExamDashboard'])->name('paidExamDashboard');
 
 });
 
