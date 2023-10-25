@@ -2,6 +2,7 @@
 
 @section('space-work')
 
+
     <h2 class="mb-4">Exams</h2>
             <!-- Button trigger modal -->
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addExamModal">
@@ -34,7 +35,7 @@
                         <td>{{ $exam->exam_name }}</td>
                         <td>{{ $exam->subjects->first()->subject }}</td>
                         <td>{{ $exam->date }}</td>
-                        <td>{{ $exam->time }} Hrs</td>
+                        <td><td>{{ substr($exam->time, 0, 5) }} Hrs</td>
                         <td>{{ $exam->attempt }} Time</td>
                         <td>
                             @if($exam->plan != 0)
@@ -77,7 +78,7 @@
 
    
 
-    <!-- Modal -->
+    <!-- Add exam Modal -->
 <div class="modal fade" id="addExamModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">

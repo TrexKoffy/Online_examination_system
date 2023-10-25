@@ -30,7 +30,7 @@
                     <td>{{ $exam->attempt }} Time</td>
                     <td>{{ $exam->attempt_counter }}</td>
                     <td>
-                    <b><a href="#" style="color:red">Buy Now</a><b>
+                    <b><a href="#" style="color:red;" class="buyNow" data-prices="{{ $exam->prices }}" data-toggle="modal" data-target="#buyModal">Buy Now</a><b>
                     </td>
                 </tr>
             @endforeach
@@ -45,8 +45,66 @@
 
 </table>
 
+
+    <!-- Buy Exam Modal -->
+<div class="modal fade" id="buyModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Buy Exam</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+        </div>
+        <form id="buyForm">
+        @csrf
+            <div class="modal-body">
+                <select name="price" id="price" required class="w-100"> 
+                </select>
+            </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-warning buyNowButton">Buy Now</button>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+
+
 <script>
     $(document).ready(function(){
+
+        $('.buyNow').click(function(){
+            var prices = JSON.parse($(this).attr('data-prices'));
+
+            var html = '';
+            html +=`
+                <option value="">Select Currency(Price)</option>
+                <option value="`+prices.NGN+`">NGN `+prices.NGN+`</option>
+                <option value="`+prices.USD+`">USD `+prices.USD+`</option>
+            `;
+
+            $('#price').html(html);
+
+        });
+
+        $('#buyForm').submit(function(event){
+            event.preventDefault();
+
+            var formData = $(this).serialize();
+            var price = $('#price').val();
+
+            $.ajax({
+                url:"{{ route('paymentNgn') }}",
+                type:"POST",
+                data:formData,
+                success:function(response){
+
+                }
+            });
+
+        });
 
         $('.copy').click(function(){
             $(this).parent().prepend('<span class="copied_text">Copied</span>');
