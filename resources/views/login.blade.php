@@ -40,11 +40,28 @@
             width: 100%;
         }
 
-        a {
-            display: block;
+        p {
             text-align: center;
             margin-top: 20px;
             color: #007bff;
+            font-weight: bold; /* Make the text bold */
+        }
+
+        p a {
+            text-decoration: none; /* Remove underline from the link */
+            color: #007bff; /* Set link color */
+        }
+
+        p a:hover {
+            color: #0056b3; /* Change link color on hover */
+            cursor: pointer; /* Show hand cursor on hover */
+            font-weight: bold; /* Make the text bold */
+
+        }
+
+        .no-account {
+            color: black; /* Set text color */
+            font-weight: normal; /* Set normal font weight */
         }
     </style>
 </head>
@@ -70,7 +87,8 @@
             <input placeholder="Enter your password" type="password" class="form-control" name="password">
         </div>
         <button type="submit" class="btn btn-primary">Login</button> 
-        <a href="/forget-password">Forget Password</a>
+        <p><a href="/forget-password" class="link">Forget Password</a></p>
+        <p class="no-account">No account? <a href="/register" class="link">Register Now</a></p>
     </form>
 </body>
 </html>

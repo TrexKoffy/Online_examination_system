@@ -45,71 +45,81 @@
         @endif
     </div>
 
-    <script>
-        $(document).ready(function(){
+ <script>
+    $(document).ready(function(){
 
-            $('.select_ans').click(function(){
-                var no = $(this).attr('data-id');
-                $('#ans_'+no).val($(this).val());
-            });
-
-           var time = @json($time);
-           $('.time').text(time[0]+':'+time[1]+':00 Left time');
-
-            var seconds = 59;
-            var hours = parseInt(time[0]);
-            var minutes = parseInt(time[1]);
-
-            var timer =setInterval(() => {
-                if(hours == 0 && minutes == 0 && seconds == 0){
-                    clearInterval(timer);
-                    $('#exam_form').submit()
-
-                }
-                console.log(hours+ "-:-"+minutes+" -:- "+seconds)
-
-
-                if(seconds <= 0){
-                    minutes--;
-                    seconds = 59;
-                }
-
-                if(minutes <= 0 && hours != 0){
-                    hours--;
-                    minutes = 59;
-                    seconds = 59;
-                }
-
-                let tempHours = hours.toString().length > 1? hours:'0'+hours;
-                let tempMinutes = minutes.toString().length > 1? minutes:'0'+minutes;
-                let tempSeconds = seconds.toString().length > 1? seconds:'0'+seconds;
-
-
-
-                $('.time').text(tempHours+':'+tempMinutes+':'+tempSeconds+' Left time');
-
-                seconds--;
-                
-            }, 1000);
+        $('.select_ans').click(function(){
+            var no = $(this).attr('data-id');
+            $('#ans_'+no).val($(this).val());
         });
 
-        function isValid(){
-                var result = true;
+        var time = @json($time);
+        $('.time').text(time[0]+':'+time[1]+':00 Left time');
 
-                var qlength = parseInt("{{$qcount}}")-1;
-                $('.error_msg').remove();
-                for(let i = 1; i <= qlength; i++){
-                    if($('#ans_'+i).val() == ""){
-                        result = false;
-                        $('#ans_'+i).parent().append('<span style="color:red; class="error_msg">Please select answer.</span>')
-                        setTimeout(() => {
-                            $('.error_msg').remove();
-                        }, 5000);
-                    
-                    }
-                }
-                return result;
+        var seconds = 59;
+        var hours = parseInt(time[0]);
+        var minutes = parseInt(time[1]);
+
+        var timer = setInterval(() => {
+            if(hours == 0 && minutes == 0 && seconds == 0){
+                clearInterval(timer);
+                submitForm();
+            }
+            console.log(hours+ "-:-"+minutes+" -:- "+seconds);
+
+            if(seconds <= 0){
+                minutes--;
+                seconds = 59;
+            }
+
+            if(minutes <= 0 && hours != 0){
+                hours--;
+                minutes = 59;
+                seconds = 59;
+            }
+
+            let tempHours = hours.toString().length > 1 ? hours : '0' + hours;
+            let tempMinutes = minutes.toString().length > 1 ? minutes : '0' + minutes;
+            let tempSeconds = seconds.toString().length > 1 ? seconds : '0' + seconds;
+
+            $('.time').text(tempHours+':'+tempMinutes+':'+tempSeconds+' Left time');
+
+            seconds--;
+        }, 1000);
+
+        function submitForm() {
+            $('#exam_form').unbind('submit').submit();
         }
-    </script>
+
+        $('#exam_form').submit(function(e) {
+            if (!isValid()) {
+                e.preventDefault();
+                $('#exam_form').append('<div class="alert alert-danger" role="alert">Please answer all questions before submitting the Exam.</div>');
+                setTimeout(() => {
+                    $('.alert').remove();
+                }, 5000);
+            }
+        });
+    });
+
+    function isValid(){
+        var result = true;
+        
+        var qlength = parseInt("{{$qcount}}") - 1;
+
+        $('.error_msg').remove();
+        for(let i = 1; i <= qlength; i++){
+            if($('#ans_'+i).val() == ""){
+                result = false;
+                $('#ans_'+i).parent().append('<span style="color:red;" class="error_msg">Please select answer.</span>');
+                setTimeout(() => {
+                    $('.error_msg').remove();
+                }, 5000);
+            }
+        }
+        return result;
+    }
+</script>
+
 
 @endsection

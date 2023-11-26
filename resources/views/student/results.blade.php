@@ -20,7 +20,7 @@
                 @foreach($attempts as $attempt)
                     <tr>
                         <td>{{ $x++ }}</td>
-                        <td>{{ $attempt->exam->exam_name }}</td>
+                        <td>{{ $attempt->exam->exam_name  }}</td>
                         <td>
                             @if($attempt->status == 0)
                                 Not Declared
